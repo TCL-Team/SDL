@@ -25,7 +25,7 @@ jobs:
           ndk-version: r28c
       - name: Install ninja
         run: sudo apt-get update -y && sudo apt-get install -y ninja-build
-      - name: Build SDL Android AAR
+      - name: Build SDL Android archive
         run: |
           python build-scripts/build-release.py \
             --actions download android \
@@ -34,9 +34,10 @@ jobs:
             --commit ${{ github.sha }} \
             --root "${{ github.workspace }}" \
             --github
-      - name: Upload AAR
+          ls -la dist
+      - name: Upload Android archive
         uses: actions/upload-artifact@v4
         with:
           name: SDL-android-aar
-          path: dist/*.aar
+          path: dist/*
           if-no-files-found: error
