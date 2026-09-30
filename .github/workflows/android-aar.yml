@@ -1,0 +1,42 @@
+name: Android AAR
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/video/SDL_egl.c'
+      - '.github/workflows/android-aar.yml'
+
+jobs:
+  aar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: r28c
+      - name: Install ninja
+        run: sudo apt-get update -y && sudo apt-get install -y ninja-build
+      - name: Build SDL Android AAR
+        run: |
+          python build-scripts/build-release.py \
+            --actions download android \
+            --android-api 24 \
+            --android-ndk-home "${{ steps.ndk.outputs.ndk-path }}" \
+            --commit ${{ github.sha }} \
+            --root "${{ github.workspace }}" \
+            --github
+      - name: Upload AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: SDL-android-aar
+          path: dist/*.aar
+          if-no-files-found: error
